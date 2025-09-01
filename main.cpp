@@ -132,8 +132,8 @@ int main()
   unsigned int texture;
   glCreateTextures(GL_TEXTURE_2D, 1, &texture);
 
-  glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-  glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+  glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT );
+  glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT );
   glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -145,8 +145,46 @@ int main()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  float currentTime = glfwGetTime();
+  float time = 0;
+
+  float fps_time = 0;
   while(!glfwWindowShouldClose(window))
   {
+    float dt    = glfwGetTime() - currentTime;
+    currentTime = glfwGetTime();
+
+    time += dt;
+    fps_time += dt;
+
+    if(time >= 0.6)
+    {
+      for(int i = 0; i < 4; ++i)
+        points[i].u += 0.5;
+
+      time = 0;
+    }
+
+    if(fps_time >= 1.f)
+    {
+      std::cout << "fps: " << fps_time / dt << "\n";
+      fps_time -= 1;
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+      Image img;
+      Image_alloc(&img, width, height, 4);
+
+      glReadPixels(0, 0, img.w, img.h, GL_RGBA, GL_UNSIGNED_BYTE, img.data); //nice trick
+
+      Image_flip_y(img);
+      Image_save(img, "screenshot.png");
+      Image_free(&img);
+    }
+
+    glNamedBufferData(buffer, sizeof(vertex) * 4, points, GL_STATIC_DRAW);
+
     glClearColor(0.2, 0.2, 0.2, 1.f);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(prg);
@@ -241,6 +279,7 @@ void check_shader_compilation(unsigned int id)
 }
 
 bool check_shader_program_linkage(unsigned int id) {
+
   int lparams = -1;
   glGetProgramiv(id, GL_LINK_STATUS, &lparams);
 

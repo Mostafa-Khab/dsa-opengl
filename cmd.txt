@@ -1,0 +1,3 @@
+# trying to write video from opengl frames using ffmpeg
+ffmpeg -loglevel verbose -y -f rawvideo -pix_fmt rgba -s 800x800 -r 60 -an -i - -c:v libx264 output.mp4
+ffmpeg -f rawvideo -pix_fmt rgba -s 800x800 -r 60 -an -i - -c:v libx264 output.mp4

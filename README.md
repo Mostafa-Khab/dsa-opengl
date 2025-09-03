@@ -8,3 +8,4 @@
 
 ### Goals
 1. this code will be further refactored for better structure
+1. make it work lol
